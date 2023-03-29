@@ -1,12 +1,9 @@
 import PropTypes from 'prop-types';
-import React, {Component} from "react";
 
 import ImageGalleryItem from "components/ImageGalleryItem/ImageGalleryItem";
 import css from 'components/ImageGallery/ImageGallery.module.css'
 
-class ImageGallery extends Component {
-    render() { 
-        const {images,clickImages}= this.props
+export default function ImageGallery ({ images, clickImages }) {
         
         return (
             <>
@@ -20,16 +17,13 @@ class ImageGallery extends Component {
                 largeImageURL={largeImageURL}
                 clickImages={clickImages}
                 />
-
+                
               })}
             </ul> 
             
         </>
         )
-    }
 }
- 
-export default ImageGallery;
 
 ImageGallery.propTypes= {
   loading:PropTypes.bool,

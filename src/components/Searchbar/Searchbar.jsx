@@ -1,33 +1,28 @@
 import PropTypes from 'prop-types';
-import React, {Component} from "react";
+import {useState} from "react";
 import css from 'components/Searchbar/Searchbar.module.css'
 
-class Searchbar extends Component {
-  state = {
-    search: '',
+const Searchbar = ({handleFormSubmit}) => {
+  const [search, setSearch]= useState('')
+
+  const handleChange = ev => {
+    setSearch(ev.currentTarget.value)
   }
 
-  handleChange=ev=>{
-    this.setState({search:ev.currentTarget.value})
-  }
+  const handleSubmit = event => {
+    event.preventDefault()
 
-  handleSubmit =event=> {
-    const {search} = this.state;
-    const {onSubmit} = this.props;
-    
-    event.preventDefault();
     if(search.trim()===''){
         return alert('An empty line')
     }
-
-    onSubmit(search)
-    this.setState({search:''})
+  
+    handleFormSubmit(search)
+    setSearch('')
   }
-  render() {
-    const {search} = this.state
+
     return ( 
     <header className={css.Searchbar}>
-    <form onSubmit={this.handleSubmit} className={css.SearchForm}>
+    <form onSubmit={handleSubmit} className={css.SearchForm}>
     <button type="submit" className={css.SearchFormButton}>
       <span className={css.SearchFormButtonLabel}>Search</span>
     </button>
@@ -39,16 +34,16 @@ class Searchbar extends Component {
       // autoFocus
       placeholder="Search images and photos"
       value={search}
-      onChange={this.handleChange}
+      onChange={handleChange}
     />
   </form>
 </header>
     )
-  }
+  
 }
-
-export default Searchbar;
 
 Searchbar.propTypes={
   search:PropTypes.string,
 }
+
+export default Searchbar;

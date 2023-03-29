@@ -1,9 +1,6 @@
-import React, {Component} from "react";
 import {Vortex} from 'react-loader-spinner'
 
-class Loader extends Component {
-    state = {  } 
-    render() { 
+export default function Loader() {
         return (
             <Vortex
                 visible={true}
@@ -15,7 +12,4 @@ class Loader extends Component {
                 colors={['red', 'green', 'blue', 'yellow', 'orange', 'purple']}
             />
         );
-    }
 }
- 
-export default Loader;

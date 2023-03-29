@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import React, {Component} from "react";
+import {useState, useEffect} from "react";
 import Searchbar from '../components/Searchbar/Searchbar';
 import APIfetch from './API/APIfetch'
 import Loader from './Loader/loader';
@@ -8,92 +8,74 @@ import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
 
 
-export default class App extends Component {
-  state = { 
-    images:[],
-    search: '',
-    total:null,
-    queryPage:1,
-    error:null,
-    loading:false,
-    modal:{
-      showModal: false,
-      largeImageURL: '',
-    }
-  } 
-  componentDidUpdate(_, prevState){
-  const {search,queryPage,} = this.state;
-  if(prevState.search !== search || prevState.queryPage !== queryPage){
-      this.setState({loading:true})
+ const App =()=>{
+  const [images, setImages] = useState([])
+  const [search, setSearch] = useState('')
+  const [total,setTotal] = useState(null)
+  const [queryPage, setQueryPage] = useState(1)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [modal, setModal] = useState({showModal:false, largeImageURL:''})
 
-      APIfetch(search, queryPage).then(response => { 
-      
-        return this.setState(prevState=>({
-      images:[...prevState.images, ...response.hits],
-      total:response.totalHits,
-      }))
-      
-    }) 
-    .catch(error=>this.setState({error}))
-    .finally(()=>this.setState({loading:false}))
-    }
-  }
-  
-  onLoadMore=()=>{   
-          this.setState(prev=>({
-            queryPage: prev.queryPage + 1,
-          }))
+  let loadMore=false;
 
+  useEffect(()=>{
+    if(!search) return
+      setLoading(true)
+
+      APIfetch( search, queryPage).then(({hits, totalHits}) => { 
+
+      return (
+        setImages(prev=>[...prev, ...hits]),
+        setTotal(totalHits)
+      )
+      })
+      .catch(error=>setError(error))
+      .finally(()=>setLoading(false))
+  },[search, queryPage])
+
+  const onLoadMore=()=>{   
+    setQueryPage(prev=>prev + 1)
   }
 
-   handleFormSubmit = search=>{
-    this.setState({search, images:[], queryPage:1})
-   }
-
-  clickImages=(largeImageURL)=>{
-    this.setState({modal:{largeImageURL, showModal:true}})
-  }
-  closeModal=()=>{
-    this.setState({modal:{largeImageURL:'', showModal:false}})
+  const handleFormSubmit = (search) => {
+    setSearch(search);
+    setImages([]);
+    setQueryPage(1);
   }
 
-  render() { 
-    const {total,error, loading, images,  modal} = this.state;
-    
+  const clickImages=(largeImageURL)=>{
+    setModal({largeImageURL, showModal:true})
+  }
 
-    let loadMore=false;
-    if (images.length < total){
-      console.log(images.length, total)
-      loadMore = true;
-    }
-    
-    
+  const closeModal=()=>{
+    setModal({largeImageURL:'', showModal:false})
+  }
+
     return (
       <div style={{display: 'grid', gridTemplateColumns: '1fr',
         gridGap: 16, paddingBottom: 24}}
       > 
       {modal.showModal && (<Modal 
-      closeModal={this.closeModal} 
+      closeModal={closeModal} 
       largeImageURL={modal.largeImageURL} />)}
         
-        <Searchbar onSubmit={this.handleFormSubmit}/>     
+        <Searchbar handleFormSubmit={handleFormSubmit}/>     
         {error && <h1>{error.message}</h1>}
         {loading && <Loader/>}
-        {images.length===0 && loading }
-
-        
 
         { images.length>0 && !loading && ( <ImageGallery 
         images={images}   
-        clickImages={this.clickImages}
+        clickImages={clickImages}
         loadMore={loadMore}
         /> )} 
-        {loadMore && (
-        <Button onLoadMoreClick={this.onLoadMore}/>)} 
+
+          {(images.length < total)?( <Button onLoadMoreClick={onLoadMore}/>)
+          :(loadMore=false)}
         
       </div>
     )
-  }
+  
 }
 
 
@@ -109,3 +91,4 @@ App.propTypes={
     largeImageURL:PropTypes.string,
   })
 }
+export default App;
